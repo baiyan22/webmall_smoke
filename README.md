@@ -1,4 +1,4 @@
-# PO_model - 电商网站自动化测试框架
+#  电商网站自动化测试框架
 
 基于 **POM (Page Object Model)** 设计模式的 UI 自动化测试框架，使用 Python + Selenium + Pytest 构建，实现电商网站的核心冒烟测试。
 
