@@ -68,7 +68,6 @@ def logged_in(driver):
             EC.presence_of_element_located((By.PARTIAL_LINK_TEXT, "退出"))
         )
         if logout_link.is_displayed():
-            is_logged_in = True
             print(f"✓ 检测到已登录状态（用户：{username}），跳过登录步骤")
     except:
         is_logged_in = False
