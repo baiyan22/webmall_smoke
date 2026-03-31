@@ -1,0 +1,41 @@
+test_search_success:
+  - name: "正常关键词搜索-搜索按钮触发"
+    trigger: "btn"
+    data:
+      - key: "电脑"
+        position: 2
+        num: 3
+    expected:
+      - url: "https://hmshop-test.itheima.net/Home/Goods/search.html?q=%E7%94%B5%E8%84%91"
+        sum: 3
+
+  - name: "正常关键词搜索-回车触发-多商品加购"
+    trigger: "enter"
+    data:
+      - key: "电脑"
+        position: 2
+        num: 2
+      - key: "冰箱"
+        position: 1
+        num: 5
+    expected:
+      - url: "https://hmshop-test.itheima.net/Home/Goods/search.html?q=%E7%94%B5%E8%84%91"
+        sum: 2
+      - url: "https://hmshop-test.itheima.net/Home/Goods/search.html?q=%E5%86%B0%E7%AE%B1"
+        sum: 7
+
+
+test_search_fail:
+  - name: "无结果关键词搜索"
+    data: "我就是新世界的卡密"
+    trigger: "btn"
+    expected:
+      - msg: "-- 抱歉没找到您要搜索的商品，换个条件试试！--"
+      - sum: 0
+      - url: "https://hmshop-test.itheima.net/Home/Goods/search.html?q=%E5%B0%B1%E6%98%AF%E6%96%B0%E4%B8%96%E7%95%8C%E7%9A%84%E5%8D%A1%E6%A0%BC"
+
+  - name: "空关键词搜索"
+    data: ""
+    trigger: "btn"
+    expected:
+      - url: "https://hmshop-test.itheima.net/home/Index/index.html" #三秒后自动跳回主页

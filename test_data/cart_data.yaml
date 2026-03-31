@@ -1,0 +1,7 @@
+test_cart_success:
+  - name: "修改购物车中第二项商品的个数为3，下单"
+    data:
+      - position: 2
+        good_num: 3
+    expected:
+      pay_num: 4

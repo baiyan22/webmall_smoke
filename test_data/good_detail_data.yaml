@@ -1,0 +1,15 @@
+test_good_detail_success:
+    - name: "商品详情页设置地址并加入购物车"
+      data:
+        - key: "手机"
+          good_position: 4
+          num: 5
+          buy_type: cart
+          province_position: 3
+          city_position: 2
+          area_position: 2
+      expected:
+        - sum: 5
+
+
+

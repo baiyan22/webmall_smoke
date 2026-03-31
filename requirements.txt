@@ -1,0 +1,10 @@
+pytest-xdist
+
+pytest-ordering
+pyyaml~=6.0.3
+pytest~=9.0.2
+selenium~=4.41.0
+webdriver-manager  # 自动管理浏览器驱动
+pytest-html        # 生成HTML报告
+allure-pytest      # （可选）生成美观allure报告
+allure-python-commons

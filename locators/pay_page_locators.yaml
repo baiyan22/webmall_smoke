@@ -1,0 +1,41 @@
+pay_page:
+
+  new_addr_root:
+    by: "xpath"
+    value: "//*[@id='address_form']/div[2]"
+
+
+  new_address:
+    close_btn:
+        by: "xpath"
+        value: "//*[@id='address_dialog_close']"
+    consignee:
+      by: "xpath"
+      value: "//*[@id='address_form']/div[2]/div/div[2]/div[1]/div/input"
+    phone_number:
+      by: "xpath"
+      value: "//*[@id='address_form']/div[2]/div/div[2]/div[2]/div/input"
+    addr:
+      province:
+        by: "xpath"
+        value: "//*[@id='province']"   #从2开始，1是请选择
+      city:
+        by: "xpath"
+        value: "//*[@id='city']"
+      district:
+          by: "xpath"
+          value: "//*[@id='district']"
+      town:
+        by: "xpath"
+        value: "//*[@id='twon']"
+
+    detailed_addr:
+      by: "xpath"
+      value: "//*[@id='address_form']/div[2]/div/div[2]/div[4]/div/input"
+
+    save_btn:
+      by: "xpath"
+      value: "//*[@id='address_submit']"
+    cancel_btn:
+      by: "xpath"
+      value: "//*[@id='address_form']/div[2]/div/div[2]/div[6]/div/div/a[2]"

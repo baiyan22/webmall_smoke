@@ -1,0 +1,84 @@
+test_register_success:
+  - name: "注册成功"
+    register_way: "phone"
+    username: "13333333331"
+    password: "123456"
+    confirm_pwd: "123456"
+    verify_code: "8888"
+    check_protocol: true
+    expected: "注册成功"
+
+test_register_fail:
+  - name: "手机格式错误"
+    register_way: "phone"
+    username: "11111111111"
+    password: "123456"
+    confirm_pwd: "123456"
+    verify_code: "8888"
+    check_protocol: true  #表示勾选服务协议
+    expected: "请用手机号或邮箱注册"
+
+  - name: "邮箱格式错误"
+    register_way: "email"
+    username: "99999999999@"
+    password: "123456"
+    confirm_pwd: "123456"
+    verify_code: "8888"
+    check_protocol: true
+    expected: "请输入正确邮箱"
+
+  - name: "密码格式错误 (位数)"
+    register_way: "phone"
+    username: "13333333333"
+    password: "12"
+    confirm_pwd: "12"
+    verify_code: "8888"
+    check_protocol: true
+    expected: "密码有效长度为 6-16 位，并且不得有空格！"
+
+  - name: "密码格式错误 (有空格)"
+    register_way: "phone"
+    username: "13333333333"
+    password: "12 568"
+    confirm_pwd: "12 568"
+    verify_code: "8888"
+    check_protocol: true
+    expected: "密码有效长度为 6-16 位，并且不得有空格！"
+
+  - name: "密码不一致"
+    register_way: "phone"
+    username: "13333333333"
+    password: "123456"
+    confirm_pwd: "888888"
+    verify_code: "8888"
+    check_protocol: true
+    expected: "两次密码不一致"
+
+  - name: "服务协议未勾选"
+    register_way: "phone"
+    username: "13333333333"
+    password: "Test123456"
+    confirm_pwd: "Test123456"
+    verify_code: "8888"
+    check_protocol: false
+    expected: "请认真阅读并勾选服务协议！"
+
+  - name: "验证码错误"
+    register_way: "phone"
+    username: "13333333333"
+    password: "123456"
+    confirm_pwd: "123456"
+    verify_code: "1234"
+    check_protocol: true
+    expected: "图像验证码错误"
+
+
+  - name: "用户名已存在"
+    register_way: "phone"
+    username: "13333333333"
+    password: "123456"
+    confirm_pwd: "123456"
+    verify_code: "8888"
+    check_protocol: true
+    expected: "该手机号已注册"
+

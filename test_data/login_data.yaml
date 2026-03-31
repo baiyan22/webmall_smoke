@@ -1,0 +1,25 @@
+test_login_success:
+  - name: "登录成功"
+    username: "13333333331"
+    password: "123456"
+    verify_code: "8888"
+    expected: "https://hmshop-test.itheima.net/Home/User/index.html"
+
+test_login_fail:
+  - name: "密码错误"
+    username: "13333333333"
+    password: "wrong_password"
+    verify_code: "8888"
+    expected: "密码错误"
+  
+  - name: "验证码错误"
+    username: "13333333333"
+    password: "123456"
+    verify_code: "wrong_code"
+    expected: "验证码错误"
+  
+  - name: "用户不存在"
+    username: "99999999999"
+    password: "123456"
+    verify_code: "8888"
+    expected: "账号不存在"

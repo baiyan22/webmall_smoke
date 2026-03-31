@@ -1,0 +1,62 @@
+cart_page:
+  # 购物车按钮
+  cart_btn:
+    by: "css"
+    value: ".c-n.fl"
+  
+  # 全选按钮
+  all_select_btn:
+    by: "xpath"
+    value: "//input[@type='checkbox' and @name='checkboxes']"
+  
+  # 删除所有选中的商品按钮
+  del_all_select_btn:
+    by: "css"
+    value: ".mal18.deleteGoods.deleteAll"
+  
+  # 收藏所有选中商品按钮
+  collect_all_select_btn:
+    by: "css"
+    value: ".mal18.moveCollect.collectAll"
+
+  #结算按钮
+  pay_btn:
+    by: "css"
+    value: ".butpayin"
+
+  #总价元素
+  total_price:
+    by: "css"
+    value: ".car_sumprice"
+
+  #选中总商品数
+  goods_select_total_num:
+    by: "xpath"
+    value: "//*[@id='goods_num']"
+  
+  # 订单页中第 position 项商品的订单项根节点
+  item_root:
+    by: "xpath"
+    value: "//*[@id='tpshop-cart']/div[3]/div[{position}]"
+    
+  # 订单项内部元素（相对于 item_root）
+  cart_item:
+    item_select_btn:
+      by: "xpath"
+      value: ".//input[@type='checkbox' and @name='checkItem']"
+    item_link:
+      by: "css"
+      value: ".msp_spname"
+    item_num_input:
+      by: "xpath"
+      value: ".//div/div[4]/input"
+    item_del_btn:
+      by: "css"
+      value: ".deleteGoods.deleteItem"
+    item_collect_btn:
+      by: "css"
+      value: ".moveCollect.collectItem"
+    single_price:
+      by: "xpath"
+      value: ".//div/div/div[3]/span"  # 注意点号开头，表示相对查找
+

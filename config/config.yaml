@@ -1,0 +1,29 @@
+
+
+# 前端服务器地址
+url: "https://hmshop-test.itheima.net/"
+
+#后台服务器地址
+api_url: "https://hmshop-test.itheima.net/index.php/Admin/Admin/login"
+
+# 浏览器配置
+browser: "chrome"  # 可选：chrome, firefox, edge
+
+# WebDriver 驱动路径
+chromedriver_path: "D:/PythonProject/PO_model/drivers/chromedriver.exe"
+geckodriver_path: "D:/PythonProject/PO_model/drivers/geckodriver.exe"
+
+# 等待时间设置（秒）
+implicit_wait: 10
+page_load_timeout: 30
+script_timeout: 30
+
+# 其他选项
+headless: false  # 是否无头模式
+maximize: true   # 是否最大化窗口
+
+# 测试账号配置 (用于已登录状态的 fixture)
+test_account:
+  username: "13333333338"
+  password: "123456"
+  verify_code: "8888"
