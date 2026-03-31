@@ -28,13 +28,11 @@ PO_model/
 ├── drivers/                 # 驱动层
 │   └── driver_manager.py   # 浏览器驱动管理器
 ├── locators/                # 定位层
-│   ├── cart_page_locators.yaml
-│   └── pay_page_locators.yaml
+│   └── cart_page_locators.yaml
 ├── pages/                   # 页面对象层（POM 核心）
 │   ├── page_cart.py        # 购物车页面对象
 │   ├── page_good_detail.py # 商品详情页面对象
 │   ├── page_login.py       # 登录页面对象
-│   ├── page_pay.py         # 支付页面对象
 │   ├── page_register.py    # 注册页面对象
 │   └── page_search.py      # 搜索页面对象
 ├── test_cases/              # 测试用例层
@@ -91,7 +89,7 @@ PO_model/
 - ✅ 加入购物车成功（冒烟测试）
 - ✅ 购物车价格计算验证
 
-## 🛠️ 环境准备
+## 环境准备
 
 ### 前置要求
 - Python 3.8+
@@ -210,10 +208,6 @@ allure open ./report
 - 快速验证系统稳定性
 - 标记为 `@pytest.mark.smoke`
 
-### 异常场景测试
-- 覆盖常见的错误输入
-- 验证系统的容错能力
-- 检查错误提示的准确性
 
 ### 数据驱动测试
 - 测试数据与代码分离
