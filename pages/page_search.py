@@ -1,8 +1,11 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+from utils.log_utils import GetLogger
 
 from base.base_page import BasePage
+
+logger = GetLogger().get_logger()
 
 
 class GoodsItem(BasePage):
@@ -20,6 +23,7 @@ class GoodsItem(BasePage):
         self.add_cart_btn = By.XPATH, ".//a[text()='加入购物车']"
         # 商品详情链接（用于跳转到详情页）- 在 context 内查找第一个 a 标签
         self.item_link = By.XPATH, ".//div[contains(@class,'goods-img') or contains(@class,'title')]//a[1]"
+        logger.debug(f"GoodsItem 初始化完成，位置: {item_element}")
     
     # 在 context 容器内查找（而不是整个页面）
     def context_find_element(self, loc, timeout=10):
@@ -30,34 +34,42 @@ class GoodsItem(BasePage):
 
     # 设置购买数量
     def set_buy_num(self, num):
+        logger.info(f"设置商品数量为: {num}")
         # 等待输入框可见后再操作
         num_ele = self.context_find_element(self.num_input)
         num_ele.clear()
         num_ele.send_keys(str(num))
+        logger.debug("数量设置完成")
 
     # 点击加入购物车
     def click_add_cart(self):
+        logger.info("点击加入购物车按钮")
         # 等待按钮可点击后再点击
         btn = self.context_find_element(self.add_cart_btn)
         btn.click()
+        logger.debug("加购按钮点击完成")
     
     # 点击整个商品项（跳转到详情页）
     def click_item(self):
         """点击商品项的详情链接，用于跳转到商品详情页"""
+        logger.info("点击商品项跳转到详情页")
         # 在商品项容器内查找详情链接并点击
         try:
             # 尝试查找商品详情链接（优先使用通用选择器）
             link = self.context_find_element(self.item_link)
             link.click()
+            logger.debug("通过常规方式点击商品链接成功")
         except Exception as e:
-            print(f"→ 常规点击失败：{str(e)}，尝试使用 JS 点击...")
+            logger.warning(f"→ 常规点击失败：{str(e)}，尝试使用 JS 点击...")
             # 如果找不到特定的链接，尝试点击 context 内的第一个 a 标签
             try:
                 first_link = self.context.find_element(By.TAG_NAME, 'a')
                 self.driver.execute_script("arguments[0].click();", first_link)
+                logger.debug("通过 JS 点击第一个 a 标签成功")
             except:
                 # 最后方案：直接点击 context（某些网站可能有效）
                 self.driver.execute_script("arguments[0].click();", self.context)
+                logger.debug("通过 JS 点击 context 成功")
 
 class PageSearch(BasePage):
     """搜索页面配置"""
@@ -102,22 +114,28 @@ class PageSearch(BasePage):
 
     def page_input_search(self, key):
         """输入搜索关键词"""
+        logger.info(f"输入搜索关键词: {key}")
         self.base_input(self.search_input, key)
 
     def page_click_search_btn(self):
         """点击搜索按钮"""
+        logger.info("点击搜索按钮")
         self.base_click(self.search_btn)
 
     def page_enter_search(self):
         """回车触发搜索"""
+        logger.info("按回车键触发搜索")
         self.base_input(self.search_input, Keys.ENTER)
 
     def page_get_url(self):
         """获取当前页面 URL"""
-        return self.driver.current_url
+        url = self.driver.current_url
+        logger.debug(f"当前页面 URL: {url}")
+        return url
 
     def page_get_screenshot(self):
         """截图"""
+        logger.info("执行页面截图")
         return self.base_get_screenshot()
 
     def page_get_item_by_position(self, position):
@@ -127,27 +145,34 @@ class PageSearch(BasePage):
         position = 2 → 第 2 个商品
         完全和页面看到的一样！
         """
+        logger.info(f"获取第 {position} 个商品项")
         # 等待商品列表容器可见
         list_container = self.base_find_visible_element(self.goods_list)
         # 定位第 position 个 li，即 第 position 个商品
         item_xpath = f"./ul/li[{position}]/div"
         single_item_ele = list_container.find_element(By.XPATH, item_xpath)
+        logger.debug(f"成功获取第 {position} 个商品项")
         # 返回商品组件对象（需传入 driver 和元素）
         return GoodsItem(self.driver, single_item_ele)
 
     def page_add_item_to_cart_by_position(self, position=1, buy_num=1):
         """封装统一「指定位置 + 数量 加购」"""
+        logger.info(f"将第 {position} 个商品加入购物车，数量: {buy_num}")
         item = self.page_get_item_by_position(position)
         item.set_buy_num(buy_num)
         item.click_add_cart()
+        logger.info("加购操作完成")
 
     #关闭成功加入提示框
     def page_close_add_success(self):
+        logger.info("关闭加入购物车成功提示框")
         self.base_click(self.close_add_success)
 
     def page_get_cart_num(self):
         """获取购物车角标数量"""
-        return self.base_get_text(self.cart_nums)
+        cart_num = self.base_get_text(self.cart_nums)
+        logger.info(f"购物车商品数量: {cart_num}")
+        return cart_num
 
     def page_search_and_click_item(self, key, position):
         """
@@ -156,8 +181,11 @@ class PageSearch(BasePage):
             key: 搜索关键词
             position: 商品位置
         """
+        logger.info("="*30 + " 开始执行搜索并点击商品 " + "="*30)
+        logger.info(f"搜索关键词: {key}, 商品位置: {position}")
         self.page_input_search(key)
         self.page_click_search_btn()
         self.page_get_item_by_position(position).click_item()
+        logger.info("="*30 + " 搜索并点击商品完成 " + "="*30)
 
 

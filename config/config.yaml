@@ -24,6 +24,6 @@ maximize: true   # 是否最大化窗口
 
 # 测试账号配置 (用于已登录状态的 fixture)
 test_account:
-  username: "13333333338"
+  username: "13333333331"
   password: "123456"
   verify_code: "8888"

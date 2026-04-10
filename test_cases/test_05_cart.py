@@ -12,6 +12,9 @@ config = read_yaml(os.path.join(os.path.dirname(__file__), '../config/config.yam
 # 读取测试数据
 test_data = read_yaml(os.path.join(os.path.dirname(__file__), '../test_data/cart_data.yaml'))
 
+# 日志实例化
+logger = GetLogger().get_logger()
+
 class TestCart:
     """购物车测试类"""
     driver = None
@@ -68,25 +71,25 @@ class TestCart:
                 all_select_checkbox = self.page_cart.base_find_element(self.page_cart.all_select_btn)
                 is_checked = all_select_checkbox.is_selected()
                 
-                GetLogger().get_logger().info(f"全选按钮当前状态：{'已勾选' if is_checked else '未勾选'}")
+                logger.info(f"全选按钮当前状态：{'已勾选' if is_checked else '未勾选'}")
                 
                 if is_checked:
-                    GetLogger().get_logger().info("检测到全选状态，正在取消...")
+                    logger.info("检测到全选状态，正在取消...")
                     self.page_cart.page_all_select_click()
                     time.sleep(1)  # 等待页面刷新
-                    GetLogger().get_logger().info("已取消所有商品的勾选")
+                    logger.info("已取消所有商品的勾选")
                     
                     # 关键：刷新页面确保价格重新计算
-                    GetLogger().get_logger().info("→ 刷新页面以确保价格同步...")
+                    logger.info("→ 刷新页面以确保价格同步...")
                     self.driver.refresh()
                     time.sleep(2)  # 等待页面完全刷新
-                    GetLogger().get_logger().info("✓ 页面刷新完成")
+                    logger.info("✓ 页面刷新完成")
                 else:
-                    GetLogger().get_logger().info("商品未处于全选状态")
+                    logger.info("商品未处于全选状态")
             except Exception as e:
                 error_msg = str(e)
-                GetLogger().get_logger().warning(f"检查全选按钮时发生异常：{error_msg}")
-                GetLogger().get_logger().info("继续执行后续步骤（可能无全选按钮或无需取消）")
+                logger.warning(f"检查全选按钮时发生异常：{error_msg}")
+                logger.info("继续执行后续步骤（可能无全选按钮或无需取消）")
 
         total_price = 0
 
@@ -100,19 +103,19 @@ class TestCart:
             
             # 先取消勾选，再重新勾选（确保状态正确）
             with allure.step(
-                    f"勾选中购物车中第 {position} 个商品，并修改购买数量为{good_num}"):
+                    f"✅ 勾选第 {position} 个商品，并修改购买数量为{good_num}"):
                 
                 # 关键步骤：先修改数量，再重新勾选（触发页面刷新）
                 # 1. 如果商品已勾选，先取消
                 if cart_item.item_is_selected():
                     cart_item.item_unselect()
-                    GetLogger().get_logger().info(f"第 {position} 个商品已取消勾选")
+                    logger.info(f"第 {position} 个商品已取消勾选")
                     import time
                     time.sleep(0.3)
                 
                 # 2. 修改数量（此时不勾选，不会计入总价）
                 cart_item.item_set_num(good_num)
-                GetLogger().get_logger().info(f"第 {position} 个商品数量已修改为 {good_num}")
+                logger.info(f"第 {position} 个商品数量已修改为 {good_num}")
                 
                 # 3. 等待数量修改生效和价格刷新
                 import time
@@ -120,7 +123,7 @@ class TestCart:
 
                 # 4. 勾选商品（触发前端事件，更新总价）
                 cart_item.item_select()
-                GetLogger().get_logger().info(f"第 {position} 个商品已勾选")
+                logger.info(f"第 {position} 个商品已勾选")
                 
                 # 关键：等待价格重新计算
                 import time
@@ -129,47 +132,47 @@ class TestCart:
                 # 5. 验证是否成功勾选（确保状态正确）
                 if not cart_item.item_is_selected():
                     # 如果没勾选上，再次尝试
-                    GetLogger().get_logger().warning(f"第 {position} 个商品首次勾选失败，重试...")
+                    logger.warning(f"第 {position} 个商品首次勾选失败，重试...")
                     cart_item.item_select()
                     time.sleep(1)
 
                     # 再次验证
                     current_status = cart_item.item_is_selected()
-                    GetLogger().get_logger().info(f"第 {position} 个商品当前勾选状态：{current_status}")
+                    logger.info(f"第 {position} 个商品当前勾选状态：{current_status}")
 
                     if not current_status:
                         error_msg = f"❌ 第 {position} 个商品勾选失败！当前状态：{current_status}"
-                        GetLogger().get_logger().error(error_msg)
+                        logger.error(error_msg)
                         raise AssertionError(error_msg)
                     else:
-                        GetLogger().get_logger().info(f"✓ 第 {position} 个商品重试勾选成功")
+                        logger.info(f"✓ 第 {position} 个商品重试勾选成功")
                 
             # 获取单价
-            with allure.step(f"获取第 {position} 个商品的单价："):
+            with allure.step(f"💰 获取第 {position} 个商品的单价："):
                 # 再次确认商品处于勾选状态
                 if not cart_item.item_is_selected():
-                    GetLogger().get_logger().error(f"⚠️ 警告：第 {position} 个商品在获取单价时未勾选！")
+                    logger.error(f"⚠️ 警告：第 {position} 个商品在获取单价时未勾选！")
                     cart_item.item_select()
                     time.sleep(0.5)
                 
                 price = cart_item.item_get_single_price()
-                GetLogger().get_logger().info(f"商品单价为：{price}")
+                logger.info(f"商品单价为：{price}")
             
             # 累加期望总价
             total_price += price * good_num
-            GetLogger().get_logger().info(f"当前累计期望总价：{total_price}")
+            logger.info(f"当前累计期望总价：{total_price}")
 
             
-        with allure.step(f"获取结算总价格："):
+        with allure.step(f"💵 获取结算总价格："):
             total_price_actual = self.page_cart.page_get_total_price()
-            GetLogger().get_logger().info(f"结算总价格为：{total_price_actual}")
+            logger.info(f"结算总价格为：{total_price_actual}")
             
         # 验证总价（允许浮点数精度误差）
         assert abs(total_price - total_price_actual) < 0.01, \
             f"购物车结算总价格不匹配：期望{total_price:.2f}, 实际{total_price_actual:.2f}"
 
         # 截图保存
-        with allure.step("截图保存"):
+        with allure.step("📸 截图保存"):
             screenshot = self.page_cart.page_get_screenshot()
             if screenshot:
                 allure.attach(
@@ -178,7 +181,7 @@ class TestCart:
                     attachment_type=allure.attachment_type.PNG
                 )
 
-        print(f"✓ 购物车页测试通过：{case['name']}")
+        logger.info(f"✓ 购物车页测试通过：{case['name']}")
 
     @allure.feature("购物车功能")
     @allure.story("成功场景测试")
@@ -194,9 +197,34 @@ class TestCart:
         # 获取测试数据
         case = self._get_case_data(case_name, key="test_cart_success")
 
-        allure.dynamic.title(f"购物车页测试 - {case_name}（冒烟）")
-        allure.dynamic.description(f"测试场景：{case_name}")
+        allure.dynamic.title(f"🛒 购物车功能 - {case_name}（冒烟测试）")
+        allure.dynamic.description(
+            f"**测试场景**: {case_name}\n\n"
+            f"**测试目标**:\n"
+            f"- 验证进入购物车页面\n"
+            f"- 验证商品勾选/取消勾选\n"
+            f"- 验证商品数量修改\n"
+            f"- 验证购物车总价计算准确\n\n"
+            f"**预期结果**: 购物车总价计算正确"
+        )
         allure.dynamic.severity(allure.severity_level.BLOCKER)
+        allure.dynamic.tag("smoke", "cart", "price_calculation")
+        
+        # 添加测试数据附件
+        with allure.step("📋 测试数据"):
+            test_info = ""
+            for i, item in enumerate(case['data']):
+                test_info += f"商品{i+1}:\n"
+                test_info += f"  - 位置: {item['position']}\n"
+                test_info += f"  - 数量: {item['good_num']}\n"
+            
+            allure.attach(
+                test_info,
+                name="测试数据详情",
+                attachment_type=allure.attachment_type.TEXT
+            )
 
         # 执行测试
+        logger.info(f"开始执行购物车冒烟测试: {case_name}")
         self._execute_cart_test(case)
+        logger.info(f"✓ 购物车冒烟测试通过: {case_name}")

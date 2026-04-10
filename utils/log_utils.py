@@ -21,19 +21,20 @@ class GetLogger:
             cls.logger222 = logging.getLogger("admin")
 
             # 设置日志器日志级别，其添加的所有处理器都受影响
-            cls.logger222.setLevel(logging.INFO)
+            cls.logger222.setLevel(logging.DEBUG)
             # 避免重复添加处理器
             cls.logger222.handlers.clear()
 
             # 获取控制台handler对象
             sh = logging.StreamHandler()
+            sh.setLevel(logging.INFO)  # 控制台输出 INFO 及以上级别
 
             # 获取文件handler（时间分割）对象
             th = logging.handlers.TimedRotatingFileHandler(filename=cls.logname,when="h", interval=2,
                                                           backupCount=3, encoding='utf-8')
 
-            #设置文件日志级别
-            th.setLevel(logging.ERROR)
+            #设置文件日志级别 - 记录所有 DEBUG 及以上级别的日志
+            th.setLevel(logging.DEBUG)
 
             # 设置formatter
             fmt = "%(asctime)s  %(levelname)s [%(name)s] [%(filename)s(%(funcName)s:%(lineno)d)] -%(message)s"

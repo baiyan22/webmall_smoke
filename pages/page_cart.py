@@ -5,6 +5,9 @@ from utils.locator_manager import locator_manager
 from utils.locator_manager import locator_manager as lm
 from utils.log_utils import GetLogger
 
+# 日志实例化
+logger = GetLogger().get_logger()
+
 
 class CartItem(BasePage):
     """
@@ -395,15 +398,16 @@ class PageCart(BasePage):
 
     def page_click_cart(self):
         """点击购物车"""
+        logger.info("点击购物车按钮")
         self.base_click(self.cart_btn)
 
     def page_all_select_click(self):
         """点击全选按钮 - 基于原生 input 的 checked 属性判断"""
-        from utils.log_utils import GetLogger
         from selenium.webdriver.common.by import By
         from selenium.webdriver import ActionChains
         import time
         
+        logger.info("点击全选按钮")
         try:
             # 直接定位到隐藏的 input 元素
             checkbox = self.base_find_element(self.all_select_btn)
@@ -466,34 +470,43 @@ class PageCart(BasePage):
 
     def page_del_all_select_click(self):
         """点击删除所有选中商品按钮"""
+        logger.info("点击删除所有选中商品按钮")
         self.base_click(self.del_all_select_btn)
 
     def page_collect_all_select_click(self):
         """点击收藏所有选中商品按钮"""
+        logger.info("点击收藏所有选中商品按钮")
         self.base_click(self.collect_all_select_btn)
 
     def page_item_select(self,position: int):
         """勾选指定订单的勾选框"""
+        logger.info(f"勾选第 {position} 个商品")
         self.get_cart_item(position).item_select()
     def page_item_unselect(self,position: int):
         """取消勾选指定商品"""
+        logger.info(f"取消勾选第 {position} 个商品")
         self.get_cart_item(position).item_unselect()
 
     def page_change_num(self,position: int,num: int):
         """修改指定订单的数量"""
+        logger.info(f"修改第 {position} 个商品数量为: {num}")
         self.get_cart_item(position).item_set_num(num)
 
     def page_del_item(self,position: int):
         """删除指定订单"""
+        logger.info(f"删除第 {position} 个商品")
         self.get_cart_item(position).item_delete()
 
     def page_collect_item(self,position: int):
         """收藏指定订单商品"""
+        logger.info(f"收藏第 {position} 个商品")
         self.get_cart_item( position).item_collect()
 
     def page_get_single_price(self,position: int):
         """获取指定订单商品单价"""
-        return self.get_cart_item(position).item_get_single_price()
+        price = self.get_cart_item(position).item_get_single_price()
+        logger.debug(f"第 {position} 个商品单价: {price}")
+        return price
 
     def page_get_total_price(self) -> float:
         """获取选中商品总价格"""
@@ -501,7 +514,9 @@ class PageCart(BasePage):
         # 提取价格数字，例如 "￥123.45" → 123.45
         import re
         match = re.search(r'[\d.]+', price_text)
-        return float(match.group()) if match else 0.0
+        total_price = float(match.group()) if match else 0.0
+        logger.info(f"选中商品总价格: {total_price}")
+        return total_price
     
     def page_get_goods_select_total_num(self) -> int:
         """获取选中商品总数量 - 增加重试机制"""
@@ -521,8 +536,10 @@ class PageCart(BasePage):
 
     def page_pay_click(self):
         """点击结算按钮"""
+        logger.info("点击结算按钮")
         self.base_click(self.pay_btn)
 
     def page_get_screenshot(self):
         """获取当前页面截图"""
+        logger.info("执行页面截图")
         return self.base_get_screenshot()

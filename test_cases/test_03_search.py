@@ -104,7 +104,7 @@ class TestSearch:
             assert cart_num == expected_sum, f"购物车中增加的商品总数量不正确：期望{expected_sum}, 实际{cart_num}"
             
         # 截图保存
-        with allure.step("截图保存"):
+        with allure.step("📸 截图保存"):
             screenshot = self.page_search.page_get_screenshot()
             if screenshot:
                 allure.attach(
@@ -112,8 +112,8 @@ class TestSearch:
                     name="搜索结果页面截图",
                     attachment_type=allure.attachment_type.PNG
                 )
-            
-        print(f"✓ 搜索测试通过：{case['name']}")
+        
+        logger.info(f"✓ 搜索测试通过：{case['name']}")
 
     @allure.feature("搜索功能")
     @allure.story("成功场景测试")
@@ -125,16 +125,45 @@ class TestSearch:
         """
         搜索成功 - 冒烟测试（只测第一个核心流程）
         执行策略：只执行 YAML 中的第一个测试用例
+        
+        测试目标：
+        1. 验证搜索功能基本可用
+        2. 验证搜索结果 URL 正确
+        3. 验证加购功能正常
+        4. 验证购物车数量计算准确
         """
         # 获取测试数据
         case = self._get_case_data(case_name, key="test_search_success")
         
-        allure.dynamic.title(f"搜索测试 - {case_name}（冒烟）")
-        allure.dynamic.description(f"测试场景：{case_name}")
+        # Allure 报告定制
+        allure.dynamic.title(f"🔍 搜索功能 - {case_name}（冒烟测试）")
+        allure.dynamic.description(
+            f"**测试场景**: {case_name}\n\n"
+            f"**测试目标**:\n"
+            f"- 验证搜索功能基本可用\n"
+            f"- 验证搜索结果 URL 正确\n"
+            f"- 验证加购功能正常\n"
+            f"- 验证购物车数量计算准确\n\n"
+            f"**搜索关键词**: {', '.join([item['key'] for item in case['data']])}\n"
+            f"**预期结果**: 搜索成功，商品加入购物车，购物车数量增加 {case['expected'][0]['sum']} 件"
+        )
         allure.dynamic.severity(allure.severity_level.BLOCKER)
+        allure.dynamic.tag("smoke", "search", "add_to_cart")
+        
+        # 添加测试前置条件
+        with allure.step("📋 测试准备"):
+            allure.attach(
+                f"测试用例: {case_name}\n"
+                f"搜索关键词数: {len(case['data'])}\n"
+                f"预期购物车增加: {case['expected'][0]['sum']} 件",
+                name="测试信息",
+                attachment_type=allure.attachment_type.TEXT
+            )
         
         # 执行测试
+        logger.info(f"开始执行冒烟测试: {case_name}")
         self._execute_search_test(case)
+        logger.info(f"冒烟测试通过: {case_name}")
 
     @allure.feature("搜索功能")
     @allure.story("成功场景测试")
@@ -145,16 +174,33 @@ class TestSearch:
         """
         搜索成功 - 完整测试（测试所有成功场景）
         执行策略：执行 YAML 中定义的所有测试用例
+        
+        测试目标：
+        1. 覆盖所有搜索成功场景
+        2. 验证多种关键词组合
+        3. 验证批量加购功能
         """
         # 获取测试数据
         case = self._get_case_data(case_name, key="test_search_success")
         
-        allure.dynamic.title(f"搜索测试 - {case_name}（完整）")
-        allure.dynamic.description(f"测试场景：{case_name}")
+        # Allure 报告定制
+        allure.dynamic.title(f"🔍 搜索功能 - {case_name}（完整测试）")
+        allure.dynamic.description(
+            f"**测试场景**: {case_name}\n\n"
+            f"**测试目标**:\n"
+            f"- 覆盖所有搜索成功场景\n"
+            f"- 验证多种关键词组合\n"
+            f"- 验证批量加购功能\n\n"
+            f"**搜索关键词**: {', '.join([item['key'] for item in case['data']])}\n"
+            f"**预期结果**: 搜索成功，商品加入购物车，购物车数量增加 {case['expected'][0]['sum']} 件"
+        )
         allure.dynamic.severity(allure.severity_level.CRITICAL)
+        allure.dynamic.tag("full_test", "search", "add_to_cart")
         
         # 执行测试
+        logger.info(f"开始执行完整测试: {case_name}")
         self._execute_search_test(case)
+        logger.info(f"完整测试通过: {case_name}")
 
     @allure.feature("搜索功能")
     @allure.story("异常场景测试")
@@ -165,24 +211,42 @@ class TestSearch:
     def test_search_failures(self, case_name):
         """
         搜索失败/异常场景测试
+        
+        测试目标：
+        1. 验证无结果时的友好提示
+        2. 验证空关键词的处理
+        3. 确保系统不会崩溃
         """
         # 获取测试数据
         case = self._get_case_data(case_name, key="test_search_fail")
         
-        allure.dynamic.title(f"搜索测试 - {case_name}")
-        allure.dynamic.description(f"测试场景：{case_name}")
+        # Allure 报告定制
+        allure.dynamic.title(f"⚠️ 搜索功能 - {case_name}")
+        allure.dynamic.description(
+            f"**测试场景**: {case_name}\n\n"
+            f"**测试目标**:\n"
+            f"- 验证无结果时的友好提示\n"
+            f"- 验证空关键词的处理\n"
+            f"- 确保系统不会崩溃\n\n"
+            f"**搜索关键词**: {case['data']}\n"
+            f"**触发方式**: {case['trigger']}"
+        )
         allure.dynamic.severity(allure.severity_level.NORMAL)
+        allure.dynamic.tag("exception", "search")
+        
+        logger.info(f"开始执行异常测试: {case_name}")
         
         # 打开搜索页面
-        with allure.step("打开首页"):
+        with allure.step("🌐 打开首页"):
             self.page_search.open_url("https://hmshop-test.itheima.net/home/Index/index.html")
         
         # 输入搜索关键词
-        with allure.step(f"输入搜索关键词：{case['data']}"):
+        with allure.step(f"⌨️ 输入搜索关键词：{case['data']}"):
             self.page_search.page_input_search(case['data'])
         
         # 触发搜索
-        with allure.step(f"触发搜索方式：{case['trigger']}"):
+        trigger_method = "点击搜索按钮" if case['trigger'] == 'btn' else "按回车键"
+        with allure.step(f"🔘 触发搜索：{trigger_method}"):
             if case['trigger'] == 'btn':
                 self.page_search.page_click_search_btn()
             elif case['trigger'] == 'enter':
@@ -193,18 +257,18 @@ class TestSearch:
         
         # 验证错误信息（如果有）
         if 'msg' in case['expected'][0]:
-            with allure.step("验证错误提示"):
+            with allure.step("✅ 验证错误提示"):
                 # TODO: 根据实际页面的错误提示来实现
                 pass
         
         # 截图保存
-        with allure.step("截图保存"):
-            screenshot = self.page_search.base_get_screenshot()
+        with allure.step("📸 截图保存"):
+            screenshot = self.page_search.page_get_screenshot()
             if screenshot:
                 allure.attach(
                     screenshot,
-                    name="搜索异常页面截图",
+                    name="异常场景页面截图",
                     attachment_type=allure.attachment_type.PNG
                 )
         
-        print(f"✓ 搜索异常测试完成：{case_name}")
+        logger.info(f"异常测试完成: {case_name}")

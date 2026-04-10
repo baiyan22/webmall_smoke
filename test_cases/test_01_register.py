@@ -89,45 +89,49 @@ class TestRegister:
         case = self._get_case_data(case_name, key="test_register_fail")
         
         # Allure 动态标题和描述
-        allure.dynamic.title(f"注册测试 - {case_name}")
+        allure.dynamic.title(f"📝 注册功能 - {case_name}")
         allure.dynamic.description(
-            f"测试场景：{case_name}\n"
-            f"注册方式：{case['register_way']}\n"
-            f"期望提示：{case['expected']}"
+            f"**测试场景**: {case_name}\n\n"
+            f"**测试目标**:\n"
+            f"- 验证注册失败时的错误提示\n"
+            f"- 确保系统不会崩溃\n\n"
+            f"**注册方式**: {case['register_way']}\n"
+            f"**期望提示**: {case['expected']}"
         )
         allure.dynamic.severity(allure.severity_level.CRITICAL)
+        allure.dynamic.tag("exception", "register")
         
-        # 添加测试步骤
-        with allure.step(f"注册方式：{case['register_way']}"):
-            pass
-        with allure.step(f"用户名：{case['username']}"):
-            pass
-        with allure.step(f"密码：{'*' * len(case['password'])}"):
-            pass
-        with allure.step(f"确认密码：{'*' * len(case['confirm_pwd'])}"):
-            pass
-        with allure.step(f"验证码：{case['verify_code']}"):
-            pass
-        if 'check_protocol' in case:
-            with allure.step(f"是否勾选协议：{case['check_protocol']}"):
-                pass
+        # 添加测试数据附件
+        with allure.step("📋 测试数据"):
+            allure.attach(
+                f"注册方式: {case['register_way']}\n"
+                f"用户名: {case['username']}\n"
+                f"密码: {'*' * len(case['password'])}\n"
+                f"确认密码: {'*' * len(case['confirm_pwd'])}\n"
+                f"验证码: {case['verify_code']}\n"
+                f"勾选协议: {case.get('check_protocol', True)}",
+                name="测试数据详情",
+                attachment_type=allure.attachment_type.TEXT
+            )
         
         # 执行注册并获取错误信息
         error_msg = self._execute_register(case)
         
         # 截图保存
-        with allure.step("截图保存"):
+        with allure.step("📸 截图保存"):
             screenshot = self.page_register.page_get_screenshot()
             if screenshot:
                 allure.attach(
                     screenshot,
-                    name="错误页面截图",
+                    name="注册错误页面截图",
                     attachment_type=allure.attachment_type.PNG
                 )
         
         # 验证错误信息
+        logger.info(f"获取到错误信息: {error_msg}")
         assert error_msg is not None, "应该返回错误信息但没有返回"
         assert case['expected'] in error_msg
+        logger.info(f"✓ 注册异常测试通过: {case_name}")
 
     @allure.feature("注册功能")
     @allure.story("成功场景测试")
@@ -141,30 +145,36 @@ class TestRegister:
         case = self._get_case_data(case_name, key="test_register_success")
         
         # Allure 动态标题和描述
-        allure.dynamic.title(f"注册测试 - {case_name}")
+        allure.dynamic.title(f"✅ 注册功能 - {case_name}（冒烟测试）")
         allure.dynamic.description(
-            f"测试场景：{case_name}\n"
-            f"注册方式：{case['register_way']}\n"
-            f"用户名：{case['username']}"
+            f"**测试场景**: {case_name}\n\n"
+            f"**测试目标**:\n"
+            f"- 验证正常注册流程\n"
+            f"- 验证注册成功后跳转\n"
+            f"- 验证用户信息创建成功\n\n"
+            f"**注册方式**: {case['register_way']}\n"
+            f"**用户名**: {case['username']}\n"
+            f"**预期结果**: 注册成功，跳转到首页"
         )
         allure.dynamic.severity(allure.severity_level.BLOCKER)
+        allure.dynamic.tag("smoke", "register", "success")
         
-        # 添加测试步骤
-        with allure.step(f"注册方式：{case['register_way']}"):
-            pass
-        with allure.step(f"用户名：{case['username']}"):
-            pass
-        with allure.step(f"密码：{'*' * len(case['password'])}"):
-            pass
-        with allure.step(f"确认密码：{'*' * len(case['confirm_pwd'])}"):
-            pass
-        with allure.step(f"验证码：{case['verify_code']}"):
-            pass
-        with allure.step(f"勾选服务协议：{case.get('check_protocol', True)}"):
-            pass
+        # 添加测试数据附件
+        with allure.step("📋 测试数据"):
+            allure.attach(
+                f"注册方式: {case['register_way']}\n"
+                f"用户名: {case['username']}\n"
+                f"密码: {'*' * len(case['password'])}\n"
+                f"确认密码: {'*' * len(case['confirm_pwd'])}\n"
+                f"验证码: {case['verify_code']}\n"
+                f"勾选协议: {case.get('check_protocol', True)}",
+                name="测试数据详情",
+                attachment_type=allure.attachment_type.TEXT
+            )
         
         # 执行注册
-        with allure.step("执行注册操作"):
+        with allure.step("🔄 执行注册操作"):
+            logger.info("开始执行注册流程")
             self.page_register.page_register(
                 register_way=case['register_way'],
                 username=case['username'],
@@ -173,16 +183,17 @@ class TestRegister:
                 code=case['verify_code'],
                 check_protocol=case.get('check_protocol', True)
             )
+            logger.info("注册流程执行完成")
         
         # 验证注册成功：检查跳转到主页
-        with allure.step("验证注册结果"):
+        with allure.step("✅ 验证注册结果"):
             # 等待页面跳转完成（页面加载需要时间）
             import time
             time.sleep(8)  # 等待7 秒确保页面完全加载和跳转
             
             current_url = self.driver.current_url
-            print(f"当前 URL: {current_url}")
-            print(f"期望 URL: {self.page_register.home_url}")
+            logger.info(f"当前 URL: {current_url}")
+            logger.info(f"期望 URL: {self.page_register.home_url}")
             
             assert current_url == self.page_register.home_url
             
@@ -195,24 +206,51 @@ class TestRegister:
                     attachment_type=allure.attachment_type.PNG
                 )
         
+        logger.info("✓ 注册成功测试通过")
+        
         # 注册成功后退出登录，返回首页，为登录测试做准备
-        with allure.step("退出登录并返回首页"):
+        with allure.step("🚪 退出登录并返回首页"):
+            logger.info("退出登录，为下一个测试做准备")
             self.page_register.page_logout()
             time.sleep(2)  # 等待退出完成
             
             # 确保返回首页（登录测试需要从首页开始）
             self.driver.get(config['url'])
             time.sleep(1)
+            logger.info("已返回首页")
 
 
     # 测试用户名已存在
     def test_register_username_exist(self):
         """测试用户名已存在的情况"""
         logger.info("开始执行测试：用户名已存在")
+        
+        allure.dynamic.title("⚠️ 注册功能 - 用户名已存在")
+        allure.dynamic.description(
+            "**测试场景**: 用户名已存在\n\n"
+            "**测试目标**:\n"
+            "- 验证重复注册时的错误提示\n"
+            "- 确保系统正确处理重复用户名"
+        )
+        allure.dynamic.severity(allure.severity_level.NORMAL)
+        allure.dynamic.tag("exception", "register", "duplicate")
+        
         case = self._get_case_data("用户名已存在")
         error_msg = self._execute_register(case)
+        
+        logger.info(f"获取到错误信息: {error_msg}")
         assert error_msg is not None, "应该返回错误信息但没有返回"
         assert case['expected'] in error_msg
-        self.page_register.page_get_screenshot()
+        
+        with allure.step("📸 截图保存"):
+            screenshot = self.page_register.page_get_screenshot()
+            if screenshot:
+                allure.attach(
+                    screenshot,
+                    name="用户名已存在页面截图",
+                    attachment_type=allure.attachment_type.PNG
+                )
+        
+        logger.info("✓ 用户名已存在测试通过")
 
 

@@ -1,6 +1,9 @@
 from selenium.webdriver.common.by import By
 
 from base.base_page import BasePage
+from utils.log_utils import GetLogger
+
+logger = GetLogger().get_logger()
 
 
 class PageRegister(BasePage):
@@ -59,15 +62,18 @@ class PageRegister(BasePage):
 
     # 点击注册链接
     def page_click_register_link(self):
+        logger.info("点击注册链接")
         self.base_click(self.register_link)
 
     #选择注册方式
     def page_select_register_way(self, register_way):
+        logger.info(f"选择注册方式: {register_way}")
         if register_way == "phone":
             self.base_click(self.phone_register_link)
         elif register_way == "email":
             self.base_click(self.email_register_link)
         else:
+            logger.error(f"无效的注册方式: {register_way}")
             raise ValueError("无效的注册方式")
 
     # 输入用户名
@@ -81,69 +87,74 @@ class PageRegister(BasePage):
         # 简单判断：包含 @ 就认为是邮箱，否则是手机号
         # 注意：这里不做格式验证，格式验证由前端/后端负责
         if '@' in str(username):
-            print(f"→ 输入邮箱：{username}")
+            logger.info(f"→ 输入邮箱：{username}")
             self.base_input(self.email, username)
         else:
-            print(f"→ 输入手机号：{username}")
+            logger.info(f"→ 输入手机号：{username}")
             self.base_input(self.phone_number, username)
 
 
     # 输入密码
     def page_input_pwd(self, pwd):
+        logger.debug("输入密码")
         self.base_input(self.register_pwd, pwd)
 
     #确认密码
     def page_confirm_pwd(self, confirm_pwd):
+        logger.debug("确认密码")
         self.base_input(self.confirm_pwd, confirm_pwd)
 
     # 输入验证码
     def page_input_code(self, code):
-         self.base_input(self.phone_verify_code, code)
+        logger.debug(f"输入验证码: {code}")
+        self.base_input(self.phone_verify_code, code)
 
     # 用户协议
     def page_ensure_protocol_checked(self):
         """
         确保用户协议复选框一定被勾选
         逻辑：先判断 → 未勾选则勾选 → 触发事件 → 最终验证
-            
+                
         Returns:
             bool: 返回最终勾选状态
-            
+                
         Raises:
             AssertionError: 当复选框无法被勾选时抛出异常
         """
         try:
+            logger.info("检查用户协议复选框状态")
             # 1. 定位复选框（使用显式等待）
             checkbox = self.wait_element(self.protocol_checkbox, timeout=10)
-                
+                    
             # 2. 获取当前是否勾选
             is_checked = checkbox.is_selected()
-            print(f"✓ 初始勾选状态：{is_checked}")
-                
+            logger.info(f"✓ 初始勾选状态：{is_checked}")
+                    
             # 3. 未勾选 → 执行勾选
             if not is_checked:
-                print("→ 执行勾选操作...")
-                    
+                logger.info("→ 执行勾选操作...")
+                        
                 # 方法 1: JS 强制勾选（推荐，避免页面 JS 干扰）
                 self.driver.execute_script("arguments[0].checked = true;", checkbox)
                 self.driver.execute_script("arguments[0].dispatchEvent(new Event('change'));", checkbox)
-                    
+                        
                 # 可选：方法 2 - 直接点击（如果 JS 方式不起作用可切换）
                 # checkbox.click()
-                    
-                print("✓ 勾选完成")
+                        
+                logger.info("✓ 勾选完成")
                 
             # 4. 最终验证：确保一定是勾选状态
             final_status = checkbox.is_selected()
-            print(f"✓ 最终验证状态：{final_status}")
-                
+            logger.info(f"✓ 最终验证状态：{final_status}")
+                    
             # 5. 断言验证
             assert final_status is True, "用户协议勾选失败！"
-                
+                    
             return final_status
-                
+                    
         except Exception as e:
             # 截图保存错误现场
+            logger.error(f"处理用户协议复选框时发生错误：{str(e)}")
             self.page_get_screenshot()
             raise AssertionError(f"处理用户协议复选框时发生错误：{str(e)}")
 
@@ -153,6 +164,7 @@ class PageRegister(BasePage):
         逻辑：强制取消勾选 → 触发事件 → 验证状态
         """
         try:
+            logger.info("取消勾选用户协议")
             # 1. 定位复选框
             checkbox = self.wait_element(self.protocol_checkbox, timeout=10)
             
@@ -162,7 +174,7 @@ class PageRegister(BasePage):
             
             # 3. 验证确实已取消
             final_status = checkbox.is_selected()
-            print(f"✗ 取消勾选后状态：{final_status}")
+            logger.info(f"✗ 取消勾选后状态：{final_status}")
             
             # 4. 断言验证
             assert final_status is False, "用户协议取消勾选失败！"
@@ -170,23 +182,28 @@ class PageRegister(BasePage):
             return final_status
             
         except Exception as e:
+            logger.error(f"取消勾选用户协议时发生错误：{str(e)}")
             self.page_get_screenshot()
             raise AssertionError(f"取消勾选用户协议时发生错误：{str(e)}")
 
 
     # 点击注册按钮
     def page_click_register_btn(self):
+        logger.info("点击注册按钮")
         self.base_click(self.register_btn)
 
     # 获取异常信息
     def page_get_err_info(self):
         """获取错误提示信息（带等待）"""
         import time
+        logger.debug("等待并获取错误提示信息")
         time.sleep(1)  # 等待提示框出现
         try:
-             return self.base_get_text(self.register_err_info)
+             error_text = self.base_get_text(self.register_err_info)
+             logger.info(f"获取到错误信息: {error_text}")
+             return error_text
         except:
-               print("未找到错误提示元素")
+               logger.warning("未找到错误提示元素")
                return None
 
     # 点击异常信息按钮
@@ -215,6 +232,7 @@ class PageRegister(BasePage):
             code: 验证码
             check_protocol: 是否勾选用户协议（默认 True）
         """
+        logger.info("="*30 + " 开始执行注册流程 " + "="*30)
         self.page_click_register_link()
         self.page_select_register_way(register_way)
         self.page_input_username(username)
@@ -224,13 +242,14 @@ class PageRegister(BasePage):
         
         # 根据参数决定是否勾选协议
         if check_protocol:
-            print("✓ 参数指示：需要勾选用户协议")
+            logger.info("✓ 参数指示：需要勾选用户协议")
             self.page_ensure_protocol_checked()
         else:
-            print("✗ 参数指示：不勾选用户协议 (测试场景)")
+            logger.info("✗ 参数指示：不勾选用户协议 (测试场景)")
             # 关键：主动取消勾选，防止页面自动勾选
             self.page_uncheck_protocol()
         
         self.page_click_register_btn()
+        logger.info("="*30 + " 注册流程执行完成 " + "="*30)
 
         
