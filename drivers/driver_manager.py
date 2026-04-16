@@ -47,27 +47,17 @@ class DriverManager:
         if browser_type == 'chrome':
             options = webdriver.ChromeOptions()
             options.add_argument('--start-maximized')
-            # 如果配置了驱动路径则使用，否则让 Selenium Manager 自动处理
-            driver_path = self.config.get('chromedriver_path', '')
-            if driver_path and os.path.exists(driver_path):
-                logger.debug(f"使用指定的 ChromeDriver 路径: {driver_path}")
-                service = ChromeService(executable_path=driver_path)
-            else:
-                logger.debug("使用 Selenium Manager 自动管理 ChromeDriver")
-                service = ChromeService()  # Selenium Manager 会自动下载
+            # 使用 Selenium 4 内置的 Selenium Manager 自动管理 ChromeDriver
+            logger.debug("使用 Selenium Manager 自动管理 ChromeDriver")
+            service = ChromeService()  # Selenium Manager 会自动检测浏览器版本并下载匹配的驱动
             self.driver = webdriver.Chrome(service=service, options=options)
             logger.info("Chrome 浏览器创建成功")
         elif browser_type == 'firefox':
             options = webdriver.FirefoxOptions()
             options.add_argument('--start-maximized')
-            # 如果配置了驱动路径则使用，否则让 Selenium Manager 自动处理
-            driver_path = self.config.get('geckodriver_path', '')
-            if driver_path and os.path.exists(driver_path):
-                logger.debug(f"使用指定的 GeckoDriver 路径: {driver_path}")
-                service = FirefoxService(executable_path=driver_path)
-            else:
-                logger.debug("使用 Selenium Manager 自动管理 GeckoDriver")
-                service = FirefoxService()  # Selenium Manager 会自动下载
+            # 使用 Selenium 4 内置的 Selenium Manager 自动管理 GeckoDriver
+            logger.debug("使用 Selenium Manager 自动管理 GeckoDriver")
+            service = FirefoxService()  # Selenium Manager 会自动检测浏览器版本并下载匹配的驱动
             self.driver = webdriver.Firefox(service=service, options=options)
             logger.info("Firefox 浏览器创建成功")
         else:

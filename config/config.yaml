@@ -8,10 +8,7 @@ api_url: "https://hmshop-test.itheima.net/index.php/Admin/Admin/login"
 
 # 浏览器配置
 browser: "chrome"  # 可选：chrome, firefox, edge
-
-# WebDriver 驱动路径
-chromedriver_path: "D:/PythonProject/PO_model/drivers/chromedriver.exe"
-geckodriver_path: "D:/PythonProject/PO_model/drivers/geckodriver.exe"
+# 注意：使用 webdriver-manager 自动管理驱动，无需手动配置驱动路径
 
 # 等待时间设置（秒）
 implicit_wait: 10
