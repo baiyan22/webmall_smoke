@@ -3,12 +3,104 @@ from utils.yaml_utils import read_yaml
 from drivers.driver_manager import DriverManager
 from utils.log_utils import GetLogger
 import os
+import shutil
+from datetime import datetime
 
 # 日志实例化
 logger = GetLogger().get_logger()
 
 # 读取配置
 config = read_yaml(os.path.join(os.path.dirname(__file__), 'config/config.yaml'))
+
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    """
+    Hook: 监听测试用例执行状态，失败时自动截图并附加到 Allure 报告
+    
+    工作流程:
+    1. 执行测试用例
+    2. 检查用例是否失败
+    3. 如果失败，自动截图并保存到 temps 目录
+    4. 将截图附加到 Allure 报告中
+    """
+    # 执行测试用例并获取结果
+    outcome = yield
+    rep = outcome.get_result()
+    
+    # 只处理失败的测试用例（跳过 setup/teardown 阶段）
+    if rep.when == "call" and rep.failed:
+        try:
+            # 获取 driver 实例
+            driver = item.funcargs.get("driver")
+            if driver:
+                # 生成截图文件名（包含时间戳和用例名）
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                test_name = item.name
+                screenshot_filename = f"{timestamp}_{test_name}_failed.png"
+                screenshot_path = os.path.join(
+                    os.path.dirname(__file__), 
+                    "image",
+                    screenshot_filename
+                )
+                
+                # 确保 temps 目录存在
+                os.makedirs(os.path.dirname(screenshot_path), exist_ok=True)
+                
+                # 截图并保存
+                driver.save_screenshot(screenshot_path)
+                logger.warning(f"⚠️  测试失败，已自动截图: {screenshot_filename}")
+                
+                # 将截图附加到 Allure 报告
+                import allure
+                with open(screenshot_path, "rb") as f:
+                    allure.attach(
+                        f.read(),
+                        name=f"失败截图 - {test_name}",
+                        attachment_type=allure.attachment_type.PNG
+                    )
+        except Exception as e:
+            logger.error(f"❌ 自动截图失败: {str(e)}")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def clean_test_artifacts():
+    """
+    Fixture: 测试会话开始前清理旧的测试产物
+    
+    清理内容:
+    - 清空 temps 目录下的旧截图
+    - 清空 logs 目录下的旧日志文件
+    - 清空 report 目录（避免与上次报告混淆）
+    """
+    logger.info(" 开始清理旧的测试产物...")
+    
+    # 定义需要清理的目录
+    dirs_to_clean = [
+        os.path.join(os.path.dirname(__file__), "temps"),
+        os.path.join(os.path.dirname(__file__), "logs"),
+        os.path.join(os.path.dirname(__file__), "report"),
+    ]
+    
+    for dir_path in dirs_to_clean:
+        if os.path.exists(dir_path):
+            try:
+                # 遍历目录中的所有文件并删除
+                for filename in os.listdir(dir_path):
+                    file_path = os.path.join(dir_path, filename)
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                logger.info(f"✓ 已清空目录: {dir_path}")
+            except Exception as e:
+                logger.warning(f"⚠  清理目录 {dir_path} 失败: {str(e)}")
+        else:
+            logger.debug(f"目录不存在，跳过清理: {dir_path}")
+    
+    logger.info(" 测试产物清理完成")
+    yield
+    logger.info(" 测试会话结束")
 
 
 @pytest.fixture(scope="session")
